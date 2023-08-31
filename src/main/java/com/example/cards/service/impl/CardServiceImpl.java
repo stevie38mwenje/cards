@@ -21,7 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -71,10 +73,17 @@ public class CardServiceImpl implements CardService {
         if (filterParams.getStatus() != null) {
             status = StatusEnum.valueOf(filterParams.getStatus()); // Convert string to enum
         }
+        LocalDateTime createdDate = null;
+        if (filterParams.getCreatedDate() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            createdDate = LocalDateTime.parse(filterParams.getCreatedDate(), formatter);
+            log.info("Input date : {}", filterParams);
+            log.info("Parsed date : {}", createdDate);
+            log.info("Parsed date : {}", createdDate.toLocalDate());
+        }
+
         String name = filterParams.getName();
         String color = filterParams.getColor();
-        String createdDate = filterParams.getCreatedDate();
-
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
 
         if (MEMBER.equals(user.getRole().name())) {
