@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,16 +19,18 @@ public interface CardRepository extends JpaRepository<Card,Long> {
             "WHERE (:name IS NULL OR c.name = :name) " +
             "AND (:color IS NULL OR c.color = :color) " +
             "AND (:status IS NULL OR c.status = :status) " +
-            "AND (:createdDate IS NULL OR c.createdDate = :createdDate) " +
+            "AND (:createdDate IS NULL OR DATE(c.createdDate) = :createdDate) " +
             "AND c.insertedBy = :user")
-    Page<List<Card>> findByInsertedByAndFilters(User user, String name, String color, StatusEnum status, LocalDateTime createdDate, Pageable pageable);
+    Page<List<Card>> findByInsertedByAndFilters(User user, String name, String color, StatusEnum status, LocalDate createdDate, Pageable pageable);
     Page<List<Card>> findByInsertedBy(User user, Pageable pageable);
     @Query("SELECT c FROM Card c " +
             "WHERE (:name IS NULL OR c.name = :name) " +
             "AND (:color IS NULL OR c.color = :color) " +
             "AND (:status IS NULL OR c.status = :status) " +
-            "AND (:createdDate IS NULL OR c.createdDate = :createdDate)")
-    Page<List<Card>> findAllByNameAndColorAndStatusAndCreatedDate(String name, String color, StatusEnum status, LocalDateTime createdDate,
+            "AND (:createdDate IS NULL OR DATE(c.createdDate) = :createdDate)"
+
+    )
+    Page<List<Card>> findAllByNameAndColorAndStatusAndCreatedDate(String name, String color, StatusEnum status, LocalDate createdDate,
                                                                   Pageable pageable);
 
     boolean existsByCardCode(String uniqueCode);

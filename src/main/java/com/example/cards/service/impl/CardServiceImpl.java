@@ -35,6 +35,9 @@ public class CardServiceImpl implements CardService {
     private final CardRepository cardRepository;
     private static final String ADMIN = "ADMIN";
     private static final String MEMBER = "MEMBER";
+    private static final String CARD_FETCHED_SUCCESS = "fetched cards successfully";
+    private static final String CARD_NOT_FOUND = "Card not found for the given id : ";
+
 
 
     @Override
@@ -71,15 +74,13 @@ public class CardServiceImpl implements CardService {
 
         StatusEnum status = null;
         if (filterParams.getStatus() != null) {
-            status = StatusEnum.valueOf(filterParams.getStatus()); // Convert string to enum
+            status = StatusEnum.valueOf(filterParams.getStatus());
         }
-        LocalDateTime createdDate = null;
+        LocalDate createdDate = null;
         if (filterParams.getCreatedDate() != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-            createdDate = LocalDateTime.parse(filterParams.getCreatedDate(), formatter);
-            log.info("Input date : {}", filterParams);
+            createdDate = LocalDate.parse(filterParams.getCreatedDate());
+            log.info("Input date : {}", filterParams.getCreatedDate());
             log.info("Parsed date : {}", createdDate);
-            log.info("Parsed date : {}", createdDate.toLocalDate());
         }
 
         String name = filterParams.getName();
@@ -89,14 +90,14 @@ public class CardServiceImpl implements CardService {
         if (MEMBER.equals(user.getRole().name())) {
             if (name == null && color == null && status == null && createdDate == null) {
                 Page<List<Card>> cards =  cardRepository.findByInsertedBy(user, pageable);
-                return ResponseEntity.ok(GenericResponse.builder().data(Collections.singletonList(cards))
-                        .message("fetched cards successfully").status(HttpStatus.OK.value())
+                return ResponseEntity.ok(GenericResponse.builder().data(cards)
+                        .message(CARD_FETCHED_SUCCESS).status(HttpStatus.OK.value())
                         .success(true)
                         .build());
             } else {
                 Page<List<Card>> cards = cardRepository.findByInsertedByAndFilters(user, name, color, status, createdDate, pageable);
-                return ResponseEntity.ok(GenericResponse.builder().data(Collections.singletonList(cards))
-                        .message("fetched cards successfully").status(HttpStatus.OK.value())
+                return ResponseEntity.ok(GenericResponse.builder().data(cards)
+                        .message(CARD_FETCHED_SUCCESS).status(HttpStatus.OK.value())
                         .success(true)
                         .build());
             }
@@ -105,15 +106,15 @@ public class CardServiceImpl implements CardService {
 
             if (name == null && color == null && status == null && createdDate == null) {
                 Page<Card> cards =  cardRepository.findAll(pageable);
-                return ResponseEntity.ok(GenericResponse.builder().data(Collections.singletonList(cards))
-                        .message("fetched cards successfully").status(HttpStatus.OK.value())
+                return ResponseEntity.ok(GenericResponse.builder().data(cards)
+                        .message(CARD_FETCHED_SUCCESS).status(HttpStatus.OK.value())
                         .success(true)
                         .build());
 
             }
             Page<List<Card>> cards =  cardRepository.findAllByNameAndColorAndStatusAndCreatedDate(name, String.valueOf(color), status,createdDate,pageable);
-            return ResponseEntity.ok(GenericResponse.builder().data(Collections.singletonList(cards))
-                    .message("fetched cards successfully").status(HttpStatus.OK.value())
+            return ResponseEntity.ok(GenericResponse.builder().data(cards)
+                    .message(CARD_FETCHED_SUCCESS).status(HttpStatus.OK.value())
                     .success(true)
                     .build());
         }
@@ -172,7 +173,7 @@ public class CardServiceImpl implements CardService {
     public ResponseEntity<GenericResponse> getCard(Long cardID, User user) {
         try {
             var card = cardRepository.findById(cardID).orElseThrow(() ->
-                    new CustomException("Card not found for the given id : " + cardID));
+                    new CustomException(CARD_NOT_FOUND + cardID));
             log.info("user id : {}",user.getUserID());
 
             if (card.getInsertedBy().getUserID().equals(user.getUserID())||ADMIN.equals(user.getRole().name())) {
@@ -204,7 +205,7 @@ public class CardServiceImpl implements CardService {
     public ResponseEntity<GenericResponse> deleteCard(Long cardID, User user) {
         try{
             var card = cardRepository.findById(cardID).orElseThrow(()->
-                    new CustomException("Card not found for the given id : "+ cardID));
+                    new CustomException(CARD_NOT_FOUND+ cardID));
             if (card.getInsertedBy().getUserID().equals(user.getUserID())||ADMIN.equals(user.getRole().name())) {
                 cardRepository.deleteById(cardID);
                 return ResponseEntity.ok(GenericResponse.builder().data(null)
@@ -235,7 +236,7 @@ public class CardServiceImpl implements CardService {
     @Override
     public ResponseEntity<GenericResponse> deactivate(Long cardID, Integer active, User user) {
         var card = cardRepository.findById(cardID).orElseThrow(()->
-                new CustomException("Card not found for the given id : "+ cardID));
+                new CustomException(CARD_NOT_FOUND + cardID));
         if (card.getInsertedBy().getUserID().equals(user.getUserID())||ADMIN.equals(user.getRole().name())) {
             card.setActive(active);
             cardRepository.save(card);

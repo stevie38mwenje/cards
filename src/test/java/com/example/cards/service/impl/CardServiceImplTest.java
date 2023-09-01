@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -159,7 +160,7 @@ class CardServiceImplTest {
                 eq(mockFilterParams.getName()),
                 eq(mockFilterParams.getColor()),
                 eq(StatusEnum.TODO),
-                eq(mockFilterParams.getCreatedDate()),
+                any(LocalDate.class),
                 any(Pageable.class))
         ).thenReturn(Page.empty());
 
@@ -184,7 +185,7 @@ class CardServiceImplTest {
                 eq(mockFilterParams.getName()),
                 eq(mockFilterParams.getColor()),
                 eq(StatusEnum.TODO),
-                eq(mockFilterParams.getCreatedDate()),
+                any(LocalDate.class),
                 pageableCaptor.capture()
         );
 
@@ -216,7 +217,7 @@ class CardServiceImplTest {
                 eq(mockFilterParams.getName()),
                 eq(mockFilterParams.getColor()),
                 eq(StatusEnum.TODO),
-                eq(mockFilterParams.getCreatedDate()),
+                any(LocalDate.class),
                 any(Pageable.class))
         ).thenReturn(Page.empty());
 
@@ -240,7 +241,7 @@ class CardServiceImplTest {
                 eq(mockFilterParams.getName()),
                 eq(mockFilterParams.getColor()),
                 eq(StatusEnum.TODO),
-                eq(mockFilterParams.getCreatedDate()),
+                any(LocalDate.class),
                 pageableCaptor.capture()
         );
 
